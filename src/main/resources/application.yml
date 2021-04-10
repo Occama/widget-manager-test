@@ -1,0 +1,6 @@
+spring:
+  config:
+    activate:
+      on-profile: default
+server:
+  port: 9090
