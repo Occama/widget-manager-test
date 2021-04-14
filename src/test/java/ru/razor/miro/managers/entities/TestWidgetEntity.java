@@ -1,4 +1,4 @@
-package razor.miro.managers.entities;
+package ru.razor.miro.managers.entities;
 
 import lombok.Data;
 

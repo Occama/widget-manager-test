@@ -1,13 +1,14 @@
 package ru.razor.miro.managers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.validation.ValidationException;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import razor.miro.managers.entities.TestWidgetEntity;
 import ru.razor.miro.dto.WidgetDTO;
+import ru.razor.miro.managers.entities.TestWidgetEntity;
 
 import java.io.File;
 import java.net.URL;
@@ -156,5 +157,14 @@ class ArrayWidgetManagerTest {
         }
 
         fail("Didn't get Index OoB exception");
+    }
+
+    @Test
+    void testValidation() {
+        ValidationException ex = assertThrows(ValidationException.class
+                , () -> manager.addWidget(10, 10, -1, 0, 1));
+
+        assertTrue(ex.getMessage().contains("Widget width must be positive"));
+        assertTrue(ex.getMessage().contains("Widget height must be positive"));
     }
 }

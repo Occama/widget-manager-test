@@ -1,15 +1,13 @@
 package ru.razor.miro.controllers;
 
+import jakarta.validation.constraints.Min;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import ru.razor.miro.dto.WidgetDTO;
 import ru.razor.miro.managers.WidgetManager;
 
-import javax.validation.constraints.Min;
 import java.util.List;
 import java.util.UUID;
 
@@ -56,5 +54,11 @@ public class WidgetTestController {
     @PostMapping(path="getList")
     public ResponseEntity<List<WidgetDTO>> getList() {
         return new ResponseEntity<>(manager.getWidgetList(), HttpStatus.OK);
+    }
+
+    @ResponseStatus(value = HttpStatus.NOT_FOUND, reason = "No widget with requested id")
+    @ExceptionHandler(IndexOutOfBoundsException.class)
+    public void widgetNotFound() {
+        // nothing to do
     }
 }

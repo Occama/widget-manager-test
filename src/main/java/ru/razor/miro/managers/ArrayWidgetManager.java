@@ -1,5 +1,7 @@
 package ru.razor.miro.managers;
 
+import jakarta.validation.*;
+import org.hibernate.validator.messageinterpolation.ParameterMessageInterpolator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.razor.miro.dto.WidgetDTO;
@@ -8,6 +10,7 @@ import ru.razor.miro.entities.Widget;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
@@ -17,12 +20,16 @@ public class ArrayWidgetManager implements WidgetManager {
     private final List<Widget> widgetContainer;
     private final ReentrantReadWriteLock rwLock;
     private final WidgetToDTOConverter converter;
+    private final Validator validator;
 
     @Autowired
     public ArrayWidgetManager(List<Widget> widgetContainer) {
         this.widgetContainer = widgetContainer;
         rwLock = new ReentrantReadWriteLock(true);
         converter = new WidgetToDTOConverter();
+
+        ValidatorFactory factory = Validation.byDefaultProvider().configure().messageInterpolator(new ParameterMessageInterpolator()).buildValidatorFactory();
+        validator = factory.getValidator();
     }
 
     @Override
@@ -47,7 +54,7 @@ public class ArrayWidgetManager implements WidgetManager {
 
             widget = widgetContainer.get(position);
 
-            if (widget.getIndex() == index) {
+            if (index == null || widget.getIndex() == index) {
                 widget.setX(x);
                 widget.setY(y);
                 widget.setWidth(width);
@@ -111,10 +118,11 @@ public class ArrayWidgetManager implements WidgetManager {
 
     private WidgetDTO addWidget(UUID id, int x, int y, int width, int height, Integer index) {
         Widget widget;
+        int position = -1;
+
         if (index != null) {
-            int position = shiftIndices(index);
+            position = shiftIndices(index);
             widget = new Widget(id, x, y, index, width, height, LocalDateTime.now());
-            widgetContainer.add(position, widget);
         }
         else {
             widget = new Widget(UUID.randomUUID()
@@ -124,8 +132,14 @@ public class ArrayWidgetManager implements WidgetManager {
                     , width
                     , height
                     , LocalDateTime.now());
-            widgetContainer.add(widget);
         }
+
+        validateWidget(widget);
+
+        if (position >= 0)
+            widgetContainer.add(position, widget);
+        else
+            widgetContainer.add(widget);
         return converter.convert(widget);
     }
 
@@ -160,5 +174,15 @@ public class ArrayWidgetManager implements WidgetManager {
             if (widgetContainer.get(position).getId().equals(id))
                 return position;
         return -1;
+    }
+
+    private void validateWidget(Widget widget) {
+        Set<ConstraintViolation<Widget>> violations = validator.validate(widget);
+
+        if (violations.size() > 0)
+            throw new ValidationException( violations
+                                            .stream()
+                                            .map(ConstraintViolation::getMessageTemplate)
+                                            .collect(Collectors.joining("; ")) );
     }
 }

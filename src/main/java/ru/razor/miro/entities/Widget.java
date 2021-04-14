@@ -1,11 +1,11 @@
 package ru.razor.miro.entities;
 
+import jakarta.validation.constraints.Min;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Setter;
 
-import javax.validation.constraints.Min;
 import java.time.LocalDateTime;
 import java.util.UUID;
 

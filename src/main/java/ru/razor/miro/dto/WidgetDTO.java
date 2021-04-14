@@ -2,12 +2,14 @@ package ru.razor.miro.dto;
 
 import lombok.Builder;
 import lombok.Data;
+import lombok.extern.jackson.Jacksonized;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Data
-@Builder()
+@Jacksonized
+@Builder
 public class WidgetDTO {
     private UUID id;
 
