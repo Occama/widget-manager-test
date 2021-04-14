@@ -1,7 +1,9 @@
 package ru.razor.miro.entities;
 
-import lombok.*;
-import org.springframework.stereotype.Component;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.Setter;
 
 import javax.validation.constraints.Min;
 import java.time.LocalDateTime;
